@@ -1,0 +1,16 @@
+name: Generate Repo Diagram
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  generate-diagram:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Generate Visualization
+        uses: githubocto/repo-visualizer@0.9.1
