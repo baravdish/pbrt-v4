@@ -35,4 +35,5 @@ ONLY CPU: cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER="" -DPBRT_OP
 - Download tev AppImage from their Github release
 - Start the tev.AppImage program and keep the window open
 - Render with PBRT by targeting a port like this: pbrt --display-server localhost:14158 scene-v4.pbrt
-- Render with the Bash script render-cornell.sh: ./render-cornell.sh --scene scene-v4.pbrt --outfile /mnt/b2cloudstorage/Rendering-MC/PBRTv4/renderings/cornell-box-128spp.exr --spp 128 --use-tev
+- Render with the Bash script on CPU render-cornell.sh: ./render-cornell.sh --scene scene-v4.pbrt --outfile /mnt/b2cloudstorage/Rendering-MC/PBRTv4/renderings/cornell-box-128spp.exr --spp 128 --use-tev
+- Render with the Bash script on GPU render-cornell.sh: ./render-cornell.sh --scene scene-v4.pbrt --outfile /mnt/b2cloudstorage/Rendering-MC/PBRTv4/renderings/cornell-box-128spp.exr --spp 128 --use-tev --use-gpu
