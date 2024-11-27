@@ -190,7 +190,7 @@ of CUDA installed, please update your PATH.")
         endif ()
       endif ()
     endif ()
-
+    
     message (STATUS "Found CUDA: ${CUDA_VERSION_MAJOR}.${CUDA_VERSION_MINOR}.${CUDA_VERSION_PATCH}")
     if (CUDA_VERSION_MAJOR EQUAL 11 AND CUDA_VERSION_MINOR EQUAL 3 AND CUDA_VERSION_PATCH LESS 109)
       message (SEND_ERROR "Unfortunately, pbrt-v4 triggers an internal compiler error in CUDA 11.3.0. Please either use CUDA 11.0-11.2 or 11.3.1 or later.")
@@ -236,39 +236,9 @@ of CUDA installed, please update your PATH.")
                 "$<$<COMPILE_LANGUAGE:CUDA>:$<IF:$<AND:$<CONFIG:Debug>,$<NOT:$<BOOL:$<TARGET_PROPERTY:CUDA_PTX_COMPILATION>>>>,-G;-g,-lineinfo;-maxrregcount;128>>"
         )
 
-        if (PBRT_GPU_SHADER_MODEL STREQUAL "")
-            # https://wagonhelm.github.io/articles/2018-03/detecting-cuda-capability-with-cmake
-            # Get CUDA compute capability
-            set (CHECK_CUDA_OUTPUT_EXE ${CMAKE_BINARY_DIR}/checkcuda)
-            if (MSVC)
-                execute_process (COMMAND ${CMAKE_CUDA_COMPILER} -lcuda ${PBRT_SOURCE_CODE}/cmake/checkcuda.cu -ccbin ${CMAKE_CXX_COMPILER} -o ${CHECK_CUDA_OUTPUT_EXE}
-                                 RESULT_VARIABLE BUILD_CHECK_CUDA_RETURN_CODE)
-            else  ()
-                execute_process (COMMAND ${CMAKE_CUDA_COMPILER} -lcuda ${PBRT_SOURCE_CODE}/cmake/checkcuda.cu -o ${CHECK_CUDA_OUTPUT_EXE}
-                                 RESULT_VARIABLE BUILD_CHECK_CUDA_RETURN_CODE)
-            endif ()
-
-            if (NOT ${BUILD_CHECK_CUDA_RETURN_CODE} EQUAL 0)
-                message (SEND_ERROR "Was unable to build checkcuda, consider manually setting PBRT_GPU_SHADER_MODEL")
-            endif ()
-
-            execute_process (COMMAND ${CHECK_CUDA_OUTPUT_EXE}
-                             RESULT_VARIABLE CUDA_RETURN_CODE
-                             OUTPUT_VARIABLE CHECK_CUDA_OUTPUT)
-
-            if (NOT ${CUDA_RETURN_CODE} EQUAL 0)
-                message (SEND_ERROR ${CHECK_CUDA_OUTPUT})
-              else ()
-                set(ARCH "${CHECK_CUDA_OUTPUT}")
-                message (STATUS "Detected CUDA Architecture: ${ARCH}")
-                string (APPEND CMAKE_CUDA_FLAGS " --gpu-architecture=${ARCH}")
-            endif ()
-        else ()
-            set(ARCH "${PBRT_GPU_SHADER_MODEL}")
-            message (STATUS "Specified CUDA Architecture: ${ARCH}")
-            string (APPEND CMAKE_CUDA_FLAGS " --gpu-architecture=${ARCH}")
-        endif ()
-
+        set(ARCH "sm_86")  # Replace with your GPU's architecture
+        string(APPEND CMAKE_CUDA_FLAGS " --gpu-architecture=${ARCH}")
+    
         set (PBRT_CUDA_LIB cuda)
         # optix
         # FIXME
