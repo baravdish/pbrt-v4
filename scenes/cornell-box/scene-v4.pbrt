@@ -13,8 +13,12 @@ Sampler "stratified"
 PixelFilter "gaussian"
     "float xradius" [ 1.5 ]
     "float yradius" [ 1.5 ]
-Film "rgb"
-    "string filename" [ "/mnt/b2cloudstorage/Rendering-MC/PBRTv4/renderings/cornell-box-32768spp.exr" ]
+# Film "rgb"
+#    "string filename" [ "/mnt/b2cloudstorage/Rendering-MC/PBRTv4/renderings/cornell-box-32768spp.exr" ]
+#    "integer yresolution" [ 1024 ]
+#    "integer xresolution" [ 1024 ]
+Film "gbuffer" 
+    "string coordinatesystem" [ "camera" ]
     "integer yresolution" [ 1024 ]
     "integer xresolution" [ 1024 ]
 Camera "perspective"

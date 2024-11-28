@@ -654,6 +654,8 @@ GBufferFilm::GBufferFilm(FilmBaseParameters p, const AnimatedTransform &outputFr
     CHECK(!pixelBounds.IsEmpty());
     filmPixelMemory += pixelBounds.Area() * sizeof(Pixel);
     outputRGBFromSensorRGB = colorSpace->RGBFromXYZ * sensor->XYZFromSensorRGB;
+    LOG_VERBOSE("==== Created a GBuffer film with full resolution %s, pixelBounds %s",
+                fullResolution, pixelBounds);
 }
 
 PBRT_CPU_GPU void GBufferFilm::AddSplat(Point2f p, SampledSpectrum v,
