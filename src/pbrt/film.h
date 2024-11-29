@@ -371,6 +371,44 @@ class GBufferFilm : public FilmBase {
 
     PBRT_CPU_GPU void ResetPixel(Point2i p) { memset(&pixels[p], 0, sizeof(Pixel)); }
 
+    // DOC: Given a pixel, get the variance stored in that pixel. See struct Pixel as private member of class.
+    PBRT_CPU_GPU
+    Vector3f GetPixelVariance(Point2i p) const {
+        const Pixel &pixel = pixels[p];
+        return Vector3f(
+            pixel.rgbVariance[0].Variance(),
+            pixel.rgbVariance[1].Variance(),
+            pixel.rgbVariance[2].Variance()
+        );
+    }
+
+    // DOC: Get the variance map or variance buffer. The returned data type is Image.
+    Image GetVarianceImage() const {
+        // 1. Calculate image dimensions from bounds
+        Point2i resolution(pixelBounds.pMax.x - pixelBounds.pMin.x,
+                        pixelBounds.pMax.y - pixelBounds.pMin.y);
+        
+        // 2. Allocate vector for RGB variance values
+        pstd::vector<Float> variance(3 * resolution.x * resolution.y);
+        std::vector<std::string> channels = {"VarianceMap.R", "VarianceMap.G", "VarianceMap.B"};
+
+        // 3. Fill data in the variance buffer for each pixel. 
+        // The variance is stored only inside each pixel, so we need to extract is and store in an array.
+        ParallelFor2D(pixelBounds, [&](Point2i p) {
+            // Get variance for current pixel
+            Vector3f v = GetPixelVariance(p);
+            // Calculate offset or "jump" in the linear array
+            int offset = 3 * ((p.x - pixelBounds.pMin.x) + 
+                            (p.y - pixelBounds.pMin.y) * resolution.x);
+            for (int c = 0; c < 3; ++c)
+                variance[offset + c] = v[c];
+        });
+
+        // 4. Create Image with variance data
+        return Image(variance, resolution, channels);
+    }
+
+
   private:
     // GBufferFilm::Pixel Definition
     struct Pixel {

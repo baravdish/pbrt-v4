@@ -158,6 +158,22 @@ void RenderCPU(BasicScene &parsedScene) {
     // Render!
     integrator->Render();
 
+    // DOC: Write variance map to output
+    if (film.Is<GBufferFilm>()) {
+
+        LOG_VERBOSE("Writing the GBufferFilm to output...");
+        std::string filename = "variance_map.exr";
+        auto myfilm = film.GetImage();
+        // film->GetVarianceImage().Write(filename);
+        // ImageMetadata metadata;
+        // metadata.colorSpace = nullptr;  // Raw data, no color space needed
+        // metadata.pixelBounds = gbuffer->PixelBounds();
+        // metadata.fullResolution = Point2i(gbuffer->FullResolution());
+        
+        // Write variance map
+        Image varianceImage = gbuffer->GetVarianceImage();
+        varianceImage.Write("variance_map.exr", metadata);
+    }
     LOG_VERBOSE("Memory used after rendering: %s", GetCurrentRSS());
 
     PtexTextureBase::ReportStats();
