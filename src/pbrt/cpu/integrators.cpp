@@ -196,10 +196,12 @@ void ImageTileIntegrator::Render() {
 
         // Optionally write current image to disk
         if (waveStart == spp || Options->writePartialImages || referenceImage) {
+
             LOG_VERBOSE("Writing image with spp = %d", waveStart);
             ImageMetadata metadata;
             metadata.renderTimeSeconds = progress.ElapsedSeconds();
             metadata.samplesPerPixel = waveStart;
+
             if (referenceImage) {
                 ImageMetadata filmMetadata;
                 Image filmImage =
@@ -210,9 +212,21 @@ void ImageTileIntegrator::Render() {
                 metadata.MSE = mse.Average();
                 fflush(mseOutFile);
             }
+
             if (waveStart == spp || Options->writePartialImages) {
                 camera.InitMetadata(&metadata);
-                camera.GetFilm().WriteImage(metadata, 1.0f / waveStart);
+                Film film = camera.GetFilm();
+                film.WriteImage(metadata, 1.0f / waveStart);
+
+                // Write variance map if it's a GBufferFilm
+                if (film.Is<GBufferFilm>()) {
+                    Image varianceImage = film.Get<GBufferFilm>().GetVarianceImage();
+                    ImageMetadata varianceMetadata;
+                    varianceMetadata.pixelBounds = film.PixelBounds();
+                    varianceMetadata.fullResolution = film.FullResolution();
+                    varianceImage.Write("variance.exr", varianceMetadata);
+                }
+
             }
         }
     }

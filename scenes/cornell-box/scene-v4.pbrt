@@ -2,14 +2,14 @@ Integrator "path"
     "integer maxdepth" [ 65 ]
 Transform [ 1 -0 -0 -0 -0 1 -0 -0 -0 -0 -1 -0 -0 -1 6.8 1  ]
 
-# Sampler "zsobol"
-#    "integer pixelsamples" [ 64 ]
+Sampler "zsobol"
+    "integer pixelsamples" [ 64 ]
 
 # 8x8 = 64 spp
-Sampler "stratified"
-    "integer xsamples" [ 8 ]
-    "integer ysamples" [ 8 ]
-    "bool jitter" [ true ]
+#Sampler "stratified"
+#    "integer xsamples" [ 8 ]
+#    "integer ysamples" [ 8 ]
+#    "bool jitter" [ true ]
 PixelFilter "gaussian"
     "float xradius" [ 1.5 ]
     "float yradius" [ 1.5 ]
