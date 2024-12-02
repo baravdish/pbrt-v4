@@ -163,6 +163,13 @@ include (CheckLanguage)
 
 check_language(CUDA)
 
+
+# ==== Uncomment if you want to TURN OFF CUDA ====
+#if (NOT PBRT_CUDA_ENABLED OR NOT PBRT_BUILD_GPU_RENDERER)
+#    set(CUDA_FOUND FALSE)
+#    set(CMAKE_CUDA_COMPILER "")
+#endif ()
+
 if (CMAKE_CUDA_COMPILER)
   if (CUDA_VERSION_MAJOR LESS 11)
     message (WARNING "pbrt-v4 requires CUDA version 11.0 or later but version ${CUDA_VERSION_MAJOR}.${CUDA_VERSION_MINOR}\

@@ -1,3 +1,10 @@
+# How to COMPILE the PBRTv4
+- If you are forced with nvidia driver 535 then stick with the maximum supported CUDA 12.2
+- Make sure nvcc and LD_LIBRARY_PATH are correctly pointed path
+- Make sure you use gcc and g++ 11.3
+- Run CMake WITHOUT installing OpenEXR beforehand: cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.2/bin/nvcc -DCMAKE_CUDA_ARCHITECTURES=86 -B build -S ..
+- Use DCMAKE_CUDA_ARCHITECTURES=86 for RTX 3080 TI.
+- Download OptiX 8.0 at usr/local/OptiX for CUDA 12.2 but OptiX 9.0 probably also works.
 
 # How to PBRTv4
 
