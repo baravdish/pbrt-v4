@@ -206,7 +206,7 @@ void ImageTileIntegrator::Render() {
                 ImageMetadata filmMetadata;
                 Image filmImage =
                     camera.GetFilm().GetImage(&filmMetadata, 1.f / waveStart);
-                ImageChannelValues mse =
+                ImageChannelValues mse 
                     filmImage.MSE(filmImage.AllChannelsDesc(), *referenceImage);
                 fprintf(mseOutFile, "%d, %.9g\n", waveStart, mse.Average());
                 metadata.MSE = mse.Average();
@@ -220,11 +220,12 @@ void ImageTileIntegrator::Render() {
 
                 // Write variance map if it's a GBufferFilm
                 if (film.Is<GBufferFilm>()) {
-                    Image varianceImage = film.Get<GBufferFilm>().GetVarianceImage();
+                    GBufferFilm* gbuffer = film.Cast<GBufferFilm>();
+                    Image varianceImage = gbuffer->GetVarianceImage();
                     ImageMetadata varianceMetadata;
                     varianceMetadata.pixelBounds = film.PixelBounds();
                     varianceMetadata.fullResolution = film.FullResolution();
-                    varianceImage.Write("variance.exr", varianceMetadata);
+                    varianceImage.Write("/home/gabriel/GITsaker/PBRTv4-SparseRenderer/pbrt-v4/scenes/output/variance.exr", varianceMetadata);
                 }
 
             }
