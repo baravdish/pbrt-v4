@@ -21,43 +21,71 @@
 
 namespace pbrt {
 
+/**
+ * @brief Core rendering function that orchestrates the entire rendering pipeline
+ * @param parsedScene Parsed scene description containing all rendering parameters and assets
+ * 
+ * This function implements the primary rendering pipeline following these stages:
+ * 1. Resource initialization and memory allocation
+ * 2. Scene graph construction
+ * 3. Rendering system configuration
+ * 4. Integration and image synthesis
+ */
 void RenderCPU(BasicScene &parsedScene) {
+    // Initialize thread-local memory allocators for parallel processing
     Allocator alloc;
     ThreadLocal<Allocator> threadAllocators([]() { return Allocator(); });
 
+
     // Create media first (so have them for the camera...)
+    // Initialize participating media for volumetric effects
+    // Critical for handling atmospheric effects, subsurface scattering, and other volumetric phenomena
     std::map<std::string, Medium> media = parsedScene.CreateMedia();
 
     // Textures
+    // Initialize texture system
+    // Handles all texture maps (diffuse, specular, normal maps etc.) used by materials
     LOG_VERBOSE("Starting textures");
     NamedTextures textures = parsedScene.CreateTextures();
     LOG_VERBOSE("Finished textures");
 
     // Lights
+    // Configure light sources
+    // Manages both area lights (mesh-based emitters) and environment/direct light sources
     std::map<int, pstd::vector<Light> *> shapeIndexToAreaLights;
     std::vector<Light> lights =
         parsedScene.CreateLights(textures, &shapeIndexToAreaLights);
 
+    // Initialize material system
+    // Handles BSDF models, surface properties, and material-geometry associations
     LOG_VERBOSE("Starting materials");
     std::map<std::string, pbrt::Material> namedMaterials;
     std::vector<pbrt::Material> materials;
     parsedScene.CreateMaterials(textures, &namedMaterials, &materials);
     LOG_VERBOSE("Finished materials");
 
+    // Build acceleration structure for ray-geometry intersection
+    // Creates spatial hierarchies (BVH) for efficient ray tracing
     Primitive accel = parsedScene.CreateAggregate(textures, shapeIndexToAreaLights, media,
                                                   namedMaterials, materials);
 
+    // Initialize core rendering components
+    // Sets up camera model, film plane (image sensor), and sampling strategy
     Camera camera = parsedScene.GetCamera();
     Film film = camera.GetFilm();
     Sampler sampler = parsedScene.GetSampler();
 
     // Integrator
+    // Create integrator based on specified algorithm
+    // Handles light transport simulation and rendering equation solution
     LOG_VERBOSE("Starting to create integrator");
     std::unique_ptr<Integrator> integrator(
         parsedScene.CreateIntegrator(camera, sampler, accel, lights));
     LOG_VERBOSE("Finished creating integrator");
 
     // Helpful warnings
+    // Validation and warning system
+    // Performs compatibility checks between scene features and chosen integrator
     bool haveScatteringMedia = false;
     for (const auto &sh : parsedScene.shapes)
         if (!sh.insideMedium.empty() || !sh.outsideMedium.empty())
@@ -156,10 +184,13 @@ void RenderCPU(BasicScene &parsedScene) {
     }
 
     // Render!
+    // Execute rendering process
+    // Dispatches rendering tasks and manages the main rendering loop
     integrator->Render();
 
     LOG_VERBOSE("Memory used after rendering: %s", GetCurrentRSS());
 
+    // Cleanup and statistics
     PtexTextureBase::ReportStats();
     ImageTextureBase::ClearCache();
 }

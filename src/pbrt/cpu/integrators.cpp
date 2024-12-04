@@ -206,7 +206,7 @@ void ImageTileIntegrator::Render() {
                 ImageMetadata filmMetadata;
                 Image filmImage =
                     camera.GetFilm().GetImage(&filmMetadata, 1.f / waveStart);
-                ImageChannelValues mse 
+                ImageChannelValues mse =
                     filmImage.MSE(filmImage.AllChannelsDesc(), *referenceImage);
                 fprintf(mseOutFile, "%d, %.9g\n", waveStart, mse.Average());
                 metadata.MSE = mse.Average();
@@ -220,14 +220,20 @@ void ImageTileIntegrator::Render() {
 
                 // Write variance map if it's a GBufferFilm
                 if (film.Is<GBufferFilm>()) {
+                    LOG_VERBOSE("==== Writing the Variance map to output");
                     GBufferFilm* gbuffer = film.Cast<GBufferFilm>();
                     Image varianceImage = gbuffer->GetVarianceImage();
                     ImageMetadata varianceMetadata;
                     varianceMetadata.pixelBounds = film.PixelBounds();
                     varianceMetadata.fullResolution = film.FullResolution();
                     varianceImage.Write("/home/gabriel/GITsaker/PBRTv4-SparseRenderer/pbrt-v4/scenes/output/variance.exr", varianceMetadata);
-                }
+                    LOG_VERBOSE("==== Finished writing map to .exr output");
 
+                    ImageAndMetadata imageAndMeta = Image::Read("/home/gabriel/GITsaker/PBRTv4-SparseRenderer/pbrt-v4/scenes/input/SparsityMap.png");
+                    Image sparsityMap = std::move(imageAndMeta.image);
+                    Point2i resolution = sparsityMap.Resolution();
+                    LOG_VERBOSE("==== Loaded sparsity map with resolution %dx%d", resolution.x, resolution.y);
+                }
             }
         }
     }
